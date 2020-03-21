@@ -1,0 +1,24 @@
+---
+title: "about"
+author: "Morgan Nelson"
+date: "March 21, 2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# Morgan Nelson
+![This is me](images/morgan.jpg)
+
+I grew up in a small town in Central Wisconsin, joined the US Army in 1992 and moved to Oklahoma.  I moved to Dallas in 1997 with my wife.
+
+I'm interested in too many things.  Most recently, I have been working with computer control wood carving and 3d printing.  I'm also working on an entry for [DIY RoboCars](https://diyrobocars.com) and looking to get involved with or start a Dallas racing chapter.  After I finish my degree
+
+I currently work for a large, unnamed defense contractor.
+
+I have an undergraduate degree with a double major in Computer Science and Software Engineering from UT Dallas.
+
+
+
+The other tabs at the top are work or statistical analyses I am working on or have completed.  Please check them out!

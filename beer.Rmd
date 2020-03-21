@@ -1,0 +1,449 @@
+---
+title: "Unit 8 Presentation"
+author: "Michael Hedge and Morgan Nelson"
+date: "February 17, 2020"
+output:
+  html_document: default
+
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# Force installing packages on other people's systems is considered rude.
+# If you do not have the required libraries, you may uncomment the following
+# section to auto-install them if you so desire.
+
+# if(!require(tidyverse)) {install.packages("tidyverse")}
+# if(!require(usmap)) {install.packages("usmap")}
+# if(!require(DMwR)) {install.packages("DMwR")}
+# if(!require(GGally)) {install.packages("GGally")}
+# if(!require(extrafont)) {install.packages("extrafont")}
+# if(!require(openintro)) {install.packages("openintro")} # abbr2state
+# if(!require(png)) {install.packages("png")} 
+# if(!require(jpeg)) {install.packages("jpeg")}
+# if(!require(ggpubr)) {install.packages("ggpubr")}
+
+
+library(tidyverse)
+library(usmap)
+library(DMwR)
+library(GGally)
+library(extrafont)
+library(openintro)
+library(png)
+library(jpeg)
+library(stringi)
+library(ggpubr)
+library(class)
+
+loadfonts(quiet = TRUE)
+```
+Greetings Mr. CEO and Mr. CFO, other distinguished guests.
+
+Given the Beer and Brewery data, our research intends to answer several compelling questions for the business:
+1. How many breweries are present in each state?
+```{r import beer data}
+beers <- read.csv("Beers.csv")
+breweries <- read.csv("Breweries.csv")
+
+# Question 2
+# Merge beer data with the breweries data. 
+# Print the first 6 observations and the last six observations to check the merged file.
+
+# Merge the two data frames into one
+data <- merge(beers,breweries,by.x = "Brewery_id", by.y = "Brew_ID")
+data <- data %>% 
+  rename(Beer = Name.x) %>%       # clean up munged names from merge
+  rename(Brewery = Name.y) %>%    # clean up munged names from merge
+  rename(Brewery_ID = Brewery_id) # Make anything with _ID the same
+
+head(data, n = 6)                 # First six from merged set
+tail(data,n = 6)                  # Last six from merged set
+
+```
+
+```{r Breweries per State}
+# font_import() # first time on a machine only.  Watch the "Console" window for a confirmation dialog
+
+# The following lines create a table that has the number of breweries
+# per state, then tidys up the columns into a format the usmaps library
+# understands
+brewery_count_by_state <- breweries %>% group_by(State) %>% summarise(count=n())
+
+brewery_count_by_state$State = as.character(brewery_count_by_state$State)    # convert factors to characters
+brewery_count_by_state$State = str_trim(brewery_count_by_state$State)        # remove leading space from string
+brewery_count_by_state = brewery_count_by_state %>% mutate(state=State)      # Capitolize State
+brewery_count_by_state = brewery_count_by_state[,3:2]                        # remove the old, non-capitolized state
+
+color_boxes <- data.frame(y1=seq(0,40,10),                                   # this sets up an array of x and y coords, and colors to
+                           y2=seq(10,50,10),                                 # zebra stripe the background later
+                           color=rep(c("#BFEFFF20","#BFEFFF40"),
+                                     length.out = 5))
+
+# turn the states back into factors
+brewery_count_by_state$state <- factor(brewery_count_by_state$state, levels = brewery_count_by_state$state[order(brewery_count_by_state$count)])
+
+# read in the photo background
+image <- readJPEG("beer_glass_background.jpg")
+# scale the background for this chart
+bg <- rasterGrob(image, height = unit(1.9, "npc"), x=0.5, y=0.2)
+
+brewery_count_by_state %>%                                                 # send in the brewery data
+  mutate(fullname = abbr2state(state)) %>%                                 # change the state abbr to full name
+  ggplot() +                     # send the data in ascending order
+  annotation_custom(bg, -Inf, Inf, -Inf, Inf) +                            # add the background image
+  geom_bar(aes(x=reorder(fullname, count), y = count), 
+           stat="identity", fill = "brown", color = "gold", alpha = 0.9) + # plot the actual bars
+  geom_text(aes(x=reorder(fullname, count), y = count,label = count), 
+            vjust = -0.5, size = 3) +                                      # draw the count up above the bars
+  geom_rect(data=color_boxes, aes(ymin = y1, ymax = y2, 
+                    xmin = -Inf, xmax = +Inf), fill = color_boxes$color) + # zebra stripe the background
+  theme_minimal() +                                                        # clear out the theme
+  theme(panel.grid.minor = element_blank(),
+        panel.grid.major = element_blank(),
+        axis.ticks = element_blank(),
+        axis.text.y = element_text(family = "Georgia", size = 10),              # set text attributes 
+        axis.text.x = element_text(family = "Verdana", angle=90, hjust = 1, vjust = .4)) +
+  labs(title = "Breweries per State", x="", y="Number of Breweries")            # set legend
+```
+
+To perform the rest of the analysis, the data was checked for a number of inconsistencies including missing values.  Over half of the records(1405 of 2410) in the dataset did not have values for the IBU, and 62 of the entries did not have a value for ABV.
+
+To allow us to continue without removing any of the records for missing values, it was decided to impute the data with a k-NN on beers in the same "Style".  What this means is that for a given beer, the algorithm will look at the collection of beers, find ones that match with it best, determine an appropriate IBU or ABV value, and replace the missing value in the sample.
+
+
+```{r impute data}
+# use the knnImputation() function from the Date Mining with R (DMwR) library to fill in missing data
+# this method uses the available information in the remainder of the data frame to establish a kNN 
+# relationship and fill in missing values
+adjData <- data %>% knnImputation()
+```
+
+```{r median ABV per state}
+# read in the photo background
+image <- readJPEG("beer_glass_background.jpg")
+# scale the background for this chart
+bg <- rasterGrob(image, height = unit(1.5, "npc"), x=0.5, y=0.5)
+
+# create the alternating color background
+color_boxes <- data.frame(y1=seq(0.00, .06, .02), 
+                          y2=seq(0.02, .08, .02),
+                          color=rep(c("#BFEFFF20","#BFEFFF40"),
+                                   length.out = 4))
+
+adjData %>% 
+  group_by(State) %>% 
+  summarize(medabv=median(ABV)) %>%                                     # create a column named medabv from the mediab abv
+  mutate(State = abbr2state(str_trim(as.character(State)))) %>%         # turn 2 letter factor into full state name
+  ggplot() +
+    annotation_custom(bg, -Inf, Inf, -Inf, Inf) +                       # beer background
+    geom_bar(aes(x=reorder(State, medabv), y=medabv),                   # plot the actual data
+             stat="identity", color="gold", fill="brown") +
+    geom_rect(data=color_boxes,                                         # zebra stripe the background
+           aes(ymin = y1, ymax = y2, xmin = -Inf, xmax = +Inf),
+           fill = color_boxes$color) +
+scale_y_continuous(breaks = sort(c(seq(0.035, 0.065, length.out = 3 ), # setup the y axis scale, and add 0.62
+                                     0.062, 0.04))) +                   # and 0.04 in it for reference
+  geom_hline(yintercept = 0.062) +                                      # highlight the max at 0.062 abv
+  geom_hline(yintercept = 0.050) +                                      # highlight the med at 0.050 abv
+  geom_hline(yintercept = 0.04) +                                       # highlight the min at 0.04 abv
+    theme_minimal() +                                                   # clear the theme
+  theme(panel.grid.minor = element_blank(),
+        panel.grid.major = element_blank(),
+        axis.ticks = element_blank(),
+        axis.text.y = element_text(family = "Georgia", size = 10),      # set text attributes
+        axis.text.x = element_text(family = "Verdana", angle=90, vjust = .4, hjust = 1)) + # rotate the x axis labels 90 degress
+    labs(title = "State Median Alcohol By Volume", x="", y="Alcohol By Volume")  +         # set the graph labels
+    coord_cartesian(ylim = c(0.035, 0.065))
+```
+
+```{r median IBU per state}
+
+# create the alternating color background
+color_boxes <- data.frame(y1=seq(0, 55, 10), 
+                          y2=seq(10, 65, 10),
+                          color=rep(c("#BFEFFF20","#BFEFFF40"),
+                                   length.out = 6))
+
+
+adjData %>% group_by(State) %>% 
+  summarize(Median=median(IBU)) %>% 
+  mutate(State = abbr2state(str_trim(as.character(State)))) %>%         # turn 2 letter factor into full state name
+  ggplot() +
+    annotation_custom(bg, -Inf, Inf, -Inf, Inf) +                       # beer background
+    geom_bar(aes(x=reorder(State, Median), y=Median),
+      stat="identity", color="gold", fill="brown") +
+    geom_text(aes(x=reorder(State, Median), y = Median,label = round(Median), angle = 90), 
+      hjust = -.5, size = 3) + 
+    geom_rect(data=color_boxes,                                         # zebra stripe the background
+           aes(ymin = y1, ymax = y2, xmin = -Inf, xmax = +Inf),
+           fill = color_boxes$color) +
+    theme_minimal() +                                                   # clear the theme
+    theme(panel.grid.minor = element_blank(),
+        panel.grid.major = element_blank(),
+        axis.ticks = element_blank(),
+        axis.text.y = element_text(family = "Georgia", size = 10),      # set text attributes
+        axis.text.x = element_text(family = "Verdana", angle=90, vjust = .4, hjust = 1)) + # rotate the x axis labels 90 degress
+    labs(title = "State Median IBU", x="", y="IBU") +
+    coord_cartesian(ylim = c(0, 65))
+```
+
+```{r highest IBU per state}
+
+# create the alternating color background
+color_boxes <- data.frame(y1=seq(0, 150, 50), 
+                          y2=seq(50, 200, 50),
+                          color=rep(c("#BFEFFF20","#BFEFFF40"),
+                                   length.out = 4))
+
+
+adjData %>% group_by(State) %>%
+  summarize(Max=max(IBU)) %>% 
+  mutate(State = abbr2state(str_trim(as.character(State)))) %>%         # turn 2 letter factor into full state name
+  ggplot() +
+    annotation_custom(bg, -Inf, Inf, -Inf, Inf) +                       # beer background
+    geom_bar(aes(x=reorder(State, Max), y=Max),
+      stat="identity", color="gold", fill="brown") +
+    geom_rect(data=color_boxes,                                         # zebra stripe the background
+           aes(ymin = y1, ymax = y2, xmin = -Inf, xmax = +Inf),
+           fill = color_boxes$color) +
+    geom_text(aes(x=reorder(State, Max), y = Max,label = round(Max), angle = 90), 
+      hjust = -.5, size = 3) +
+    theme_minimal() +                                                    # clear the theme
+    theme(panel.grid.minor = element_blank(),
+        panel.grid.major = element_blank(),
+        axis.ticks = element_blank(),
+        axis.text.y = element_text(family = "Georgia", size = 10),                        # set text attributes
+        axis.text.x = element_text(family = "Verdana", angle=90, vjust = .4, hjust = 1)) +# rotate the x axis labels 90 degress
+  labs(title = "State Max IBU", x="", y="IBU")
+
+```
+```{r highest ABV per State }
+# create the alternating color background
+color_boxes <- data.frame(y1=seq(0.00, .12, .02), 
+                          y2=seq(0.02, .14, .02),
+                          color=rep(c("#BFEFFF20","#BFEFFF40"),
+                                   length.out = 7))
+
+adjData %>% 
+  group_by(State) %>% 
+  summarize(Max=max(ABV)) %>%
+  mutate(State = abbr2state(str_trim(as.character(State)))) %>%         # turn 2 letter factor into full state name
+  ggplot() +
+  annotation_custom(bg, -Inf, Inf, -Inf, Inf) +                       # beer background
+  geom_bar(aes(x=reorder(State, Max), y=Max),
+      stat="identity", color="gold", fill="brown") +
+  scale_y_continuous(breaks = sort(c(0.00, 0.06, 0.10, 0.14))) +               # setup the y axis scale, and add 0.62
+                                                                       # and 0.04 in it for reference
+  geom_hline(yintercept = 0.14) +                                      # highlight the max at 0.062 abv
+  geom_hline(yintercept = 0.10) +                                      # highlight the med at 0.050 abv    
+  geom_hline(yintercept = 0.06) +                                      # highlight the min at 0.04 abv
+                                                                       
+  geom_rect(data=color_boxes,                                          # zebra stripe the background
+      aes(ymin = y1, ymax = y2, xmin = -Inf, xmax = +Inf),
+      fill = color_boxes$color) + labs(title="Max ABV per State", y="ABV", x="State") +
+  theme_minimal() +                                                    # clear the theme
+  theme(panel.grid.minor = element_blank(),
+        panel.grid.major = element_blank(),
+        axis.ticks = element_blank(),
+        axis.text.y = element_text(family = "Georgia", size = 10),                        # set text attributes
+        axis.text.x = element_text(family = "Verdana", angle=90, vjust = .4, hjust = 1))  # rotate the x axis labels 90 degress
+```
+
+The summary statistics of the ABV by state show a minimum ABV of 0.001, or 0.1% Alcohol by Volume.  This is either a data collection error or a set of Non-Alcoholic beers. The maximum ABV is 12.8%, and the mean ABV is 5.9% with 50% of the beers in the sample ranging from 5.0% to 6.7%.  A case could be made to discard the beers with minimum ABV as "not-beers" but rather "beer-like-beverages", as they are not subject to the same laws regulating the sale of alcoholic beverages.  Alternately, many persons are not allowed to drink alcohol because of religious beliefs or medical reasons, so it may be worth while to keep the non-alcoholic beers in the study.
+```{r summary stats of abv}
+adjData %>% select(ABV) %>% summary()
+```
+The distribution of Alcohol by Volume peaks at 5.9%, and shows a right skew, indicating that the set of beers sampled show a tendency to start at around 5% ABV, with a large grouping of beers in that 5.0%-6.7%, then a long tail reaching into higher and higher ABV numbers.  Fewer beers were below the 5.0% ABV mark.  This shows a trend towards making beers with higher and higher ABV, indicating a potential untapped market at lower alcohol contents.
+```{r histogram of ABV, large binwidth}
+adjData %>% filter(!is.na(ABV)) %>% 
+  ggplot(aes(x=ABV)) +
+  annotation_custom(bg, -Inf, Inf, -Inf, Inf) +                       # beer background
+  geom_histogram(aes(y=..density..),binwidth = 0.005, na.rm = TRUE, show.legend = TRUE) +
+  labs(title="Frequency of ABV", y="ABV", x="State") +
+  geom_density(alpha=0.2, fill="#FF6666", color="red")
+```
+
+
+Using the original data set to plot the ABV vs. IBU with a linear model regression line, we see an "up and to the right" correlation between IBU and ABV.  Pearson's Correlation is 0.67, indication a fair amount of positive correlation.
+```{r relationship between IBU and ABV}
+data %>% select(c(IBU, ABV)) %>% ggplot() +
+  annotation_custom(bg, -Inf, Inf, -Inf, Inf) +                       # beer background
+  geom_point(aes(x=IBU, y=ABV), position = "jitter", na.rm = TRUE) +
+  geom_smooth(aes(x=IBU, y=ABV), method="lm", na.rm = TRUE) +
+  stat_cor(aes(x=IBU, y=ABV),method = "pearson", label.x = 100, label.y = 0.010, na.rm = TRUE) +
+  annotate("text", x=117, y=0.017, label="Pearson's Correlation") +
+  labs(title = "Correlation of ABV vs. IBU", x="IBU", y="ABV")
+```
+If we use the imputed dataset however, the additional data tends toward the mean and the correlation drops to 54%.  Even though it lost 13% correlation points, it is still a significant positive correlation.
+```{r relationship between adjusted IBU and ABV}
+adjData %>% select(c(IBU, ABV)) %>% ggplot() +
+  annotation_custom(bg, -Inf, Inf, -Inf, Inf) +                       # beer background
+  geom_point(aes(x=IBU, y=ABV), position = "jitter", na.rm = TRUE) +
+  geom_smooth(aes(x=IBU, y=ABV), method="lm", na.rm = TRUE) +
+  stat_cor(aes(x=IBU, y=ABV),method = "pearson", label.x = 100, label.y = 0.010, na.rm = TRUE) +
+  annotate("text", x=117, y=0.017, label="Pearson's Correlation") +
+  labs(title = "Correlation of ABV vs. IBU", x="IBU", y="ABV")
+```
+
+
+```{r Unnamed data exploration, include=FALSE}
+adjData %>% 
+  group_by(Brewery) %>% 
+  summarize(count=n()) %>% 
+  filter(count > 19) %>%  
+  ggplot() + 
+    geom_bar(aes(x=reorder(Brewery, count), y=count),stat = "identity") + 
+    theme(axis.text.x = element_text(family = "Verdana", angle=90))
+```
+
+```{r knn classification for IBU of Ales}
+#install.packages("ggvis")
+library(ggvis)
+library(class)
+library(caret)
+
+# we will use the un-imputed data for this, as the data is much more accurate
+# pull out the IPAs first
+ipas <- data %>% 
+  filter(!is.na(IBU) & !is.na(ABV)) %>% 
+  filter(str_detect(Style, regex("\\bipa\\b", ignore_case = TRUE, multiline = FALSE))) %>% 
+  mutate(ipa=TRUE)
+
+# then the "other" ales
+otherAles <- data %>% 
+  filter(!is.na(IBU) & !is.na(ABV)) %>% 
+  filter(str_detect(Style, regex("\\bale\\b", ignore_case = TRUE, multiline = FALSE))) %>% 
+  filter(!str_detect(Style, regex("\\bipa\\b", ignore_case = TRUE, multiline = FALSE))) %>% 
+  mutate(ipa=FALSE)
+
+allAles <- rbind(ipas, otherAles)
+
+```
+```{r draw ellipse around centroid}
+if(!require(ggforce)) {install.packages("ggforce")}
+if(!require(concaveman)) {install.packages("concaveman")}
+library(ggforce)
+library(concaveman)
+library(tidyverse)
+
+pdf(file="output_graphs/IBU_ABV_IPAs_and_Other_Ales.pdf")
+allAles %>% ggplot(aes(x=IBU, y=ABV)) +
+  annotation_custom(bg, -Inf, Inf, -Inf, Inf) +                       # beer background
+  geom_point(aes(color = ipa)) +
+  geom_density2d(aes(color=ipa)) +
+
+  labs(title = "IBU x ABV for IPAs and Other Ales", color = "IPA?")
+dev.off()
+
+```
+If we map the IBU vs. the ABV for the groups "IPA" and "Others", then add contour lines to show the greatest concentration of values, we can clearly see the groupings of IBU and ABV for Others to be much lower in IBU and ABV than the IPAs.  While we can see that there are clearly some Other ales in the region associated with IPAs, we'd like to know if the two groups are distinct enough that we can predict the Style of beer from the IBU/ABV alone.
+
+```{r summary statistics on IBU and ABV}
+
+summary(ipas$IBU)
+summary(otherAles$IBU)
+summary(ipas$ABV)
+summary(otherAles$ABV)
+
+ipas %>% ggplot(aes(x=IBU, y=ABV)) +
+  geom_point() + geom_smooth(method="glm") + 
+  stat_cor(aes(x=IBU, y=ABV),method = "pearson", label.x = 100, label.y = 0.010, na.rm = TRUE) +
+  labs(title = "India Pale Ale IBU/ABV Correlation")
+
+otherAles %>% ggplot(aes(x=IBU, y=ABV)) + 
+  geom_point() + geom_smooth(method="glm") + 
+  stat_cor(aes(x=IBU, y=ABV),method = "pearson", label.x = 80, label.y = 0.010, na.rm = TRUE) +
+  labs(title = "Non-IPA IBU/ABV Correlation")
+```
+
+
+```{r run a 90% train/test knn on ipas}
+# run a set of tests to determine best k value
+iterations = 100 # the number of tests to run
+k_runs = 50 # the number of "k"s to run in each test
+
+# a place to hold the master data
+masterAcc = matrix(nrow = iterations, ncol=k_runs)
+
+for(j in 1:iterations) {
+  # accs = data.frame(accuracy = numeric(k_runs), k=numeric(k_runs))
+
+  # randomize the sample set for this test
+  ran <- sample(1:nrow(allAles), 0.9 * nrow(allAles))
+  ipa_train <- allAles[ran,]
+  ipa_test <- allAles[-ran,]
+  
+  # run the 'k's
+  for(i in 1:k_runs) {
+    classifications = knn(ipa_train[,c(4,5)], ipa_test[,c(4,5)], ipa_train$ipa, k=i, prob = TRUE)
+    CM = confusionMatrix(table(ipa_test$ipa, classifications))
+    masterAcc[j,i] = CM$overall[1]
+  }
+}
+```
+```{r plot the mean accuracies from the knn test}
+
+MeanAcc = colMeans(masterAcc)
+plot(seq(1,k_runs,1),MeanAcc, type="l")
+
+
+
+
+# run a single test with the experimentally gathered 'k' value
+ipa_pr <- knn(ipa_train[,c(4,5)], ipa_test[,c(4,5)], ipa_train$ipa, k=5, prob = TRUE)
+
+# get the statistics of the 
+confusionMatrix(table(ipa_test$ipa, ipa_pr))
+
+
+
+```
+```{r internal cv knn}
+set.seed(1972)
+iterations = 100
+k_runs = 50
+
+masterAcc = matrix(nrow = iterations, ncol = k_runs)
+for(j in 1:iterations) {
+  accs = data.frame(accuracy = numeric(k_runs), k = numeric(k_runs))
+  for(i in 1:k_runs) {
+    classifications = knn.cv(allAles[,c(4,5)], allAles$ipa, k=i, prob = TRUE)
+    CM = confusionMatrix(table(allAles$ipa, classifications))
+    masterAcc[j,i] = CM$overall[1]
+  }
+}
+
+MeanAcc = colMeans(masterAcc)
+plot(seq(1,k_runs,1), MeanAcc, type="l")
+
+```
+
+```{r take the k from knn.cv and get actual parameters}
+set.seed(1972)
+classifications = knn.cv(allAles[,c(4,5)], allAles$ipa, k=5, prob = TRUE)
+confusionMatrix(table(allAles$ipa, classifications))
+```
+
+The Internal Cross Validation k-Nearest Neighbor classification tells us that there is enough difference in the IBU/ABV of India Pale Ales (IPAs) to determine the Style of beer roughly 86% of the time, just from the values of IBU and ABV.  We have confidence that 95% of the time, the average accuracy of the kNN model used would be between 84% and 88% accuracy.
+
+
+```{r investigate home state from IBU, ABV, Style}
+
+# we must recode string factors as numbers for the distance algorithm in
+# the kNN classifier to work properly
+allAles <- allAles %>% 
+  mutate(city_id = as.integer(City)) %>% 
+  mutate(style_id = as.integer(Style))
+
+classifications = knn.cv(allAles[,c(4,5,13)], allAles$State, k=1, prob = TRUE)
+CM = confusionMatrix(table(allAles$State, classifications))
+CM$overall[1]
+```
+If we assume that:
+
+* current breweries are selling most of their beer locally
+* that they are making beers which sell well in their areas
+
+It could be beneficial to know what types of beer would sell best in a given state based on what is currently being produced in that state. Using a kNN classification that takes into account IBU, ABV and Style of beer, we can predict with around a 30% success rate the state that beer would most fit into.  30% may not sound like much, but compared to a purely random 1-in-50 chance of picking the right state (a 2% probability), 30% is a 15x improvement.
+

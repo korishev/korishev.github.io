@@ -1,0 +1,16 @@
+
+output:
+  html_document:
+    theme: cosmo
+    includes:
+      after_body: _footer.html
+output_dir: "."
+name: DDS Pages
+navbar:
+  title: DDS Morgan Nelson
+  type: inverse
+  left:
+  - text: About Me
+    href: about.html
+  - text: Case Study 1 (The one about beer...)
+    href: beer.html
