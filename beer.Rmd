@@ -327,7 +327,6 @@ library(ggforce)
 library(concaveman)
 library(tidyverse)
 
-pdf(file="output_graphs/IBU_ABV_IPAs_and_Other_Ales.pdf")
 allAles %>% ggplot(aes(x=IBU, y=ABV)) +
   annotation_custom(bg, -Inf, Inf, -Inf, Inf) +                       # beer background
   geom_point(aes(color = ipa)) +
