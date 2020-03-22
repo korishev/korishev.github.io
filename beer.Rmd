@@ -38,6 +38,8 @@ library(class)
 
 loadfonts(quiet = TRUE)
 ```
+
+(Part of this data and analysis are available for your interaction at [ShinyApps.io](https://nelsonms.shinyapps.io/CaseStudy1) )
 Greetings Mr. CEO and Mr. CFO, other distinguished guests.
 
 Given the Beer and Brewery data, our research intends to answer several compelling questions for the business:
@@ -327,7 +329,6 @@ library(ggforce)
 library(concaveman)
 library(tidyverse)
 
-pdf(file="output_graphs/IBU_ABV_IPAs_and_Other_Ales.pdf")
 allAles %>% ggplot(aes(x=IBU, y=ABV)) +
   annotation_custom(bg, -Inf, Inf, -Inf, Inf) +                       # beer background
   geom_point(aes(color = ipa)) +
