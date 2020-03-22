@@ -16,9 +16,14 @@
 <title>Unit 8 Presentation</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<<<<<<< HEAD
 <script src="site_libs/elevate-section-attrs-2.0/elevate-section-attrs.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link href="site_libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+=======
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+>>>>>>> 713acafe79309e05ef49e45dbad14d6be8ca38fa
 <script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
@@ -299,7 +304,11 @@ $(document).ready(function () {
 </div>
 
 
+<<<<<<< HEAD
 <p>(Part of this data and analysis are available for your interaction at <a href="https://nelsonms.shinyapps.io/CaseStudy1">ShinyApps.io</a> ) Greetings Mr. CEO and Mr. CFO, other distinguished guests.</p>
+=======
+<p>Greetings Mr. CEO and Mr. CFO, other distinguished guests.</p>
+>>>>>>> 713acafe79309e05ef49e45dbad14d6be8ca38fa
 <p>Given the Beer and Brewery data, our research intends to answer several compelling questions for the business: 1. How many breweries are present in each state?</p>
 <pre class="r"><code>beers &lt;- read.csv(&quot;Beers.csv&quot;)
 breweries &lt;- read.csv(&quot;Breweries.csv&quot;)
@@ -316,6 +325,7 @@ data &lt;- data %&gt;%
   rename(Brewery_ID = Brewery_id) # Make anything with _ID the same
 
 head(data, n = 6)                 # First six from merged set</code></pre>
+<<<<<<< HEAD
 <pre><code>##   Brewery_ID          Beer Beer_ID   ABV IBU
 ## 1          1  Get Together    2692 0.045  50
 ## 2          1 Maggie&#39;s Leap    2691 0.049  26
@@ -359,6 +369,23 @@ head(data, n = 6)                 # First six from merged set</code></pre>
 ## 2408    NY
 ## 2409    NY
 ## 2410    AK</code></pre>
+=======
+<pre><code>##   Brewery_ID          Beer Beer_ID   ABV IBU                               Style Ounces            Brewery        City State
+## 1          1  Get Together    2692 0.045  50                        American IPA     16 NorthGate Brewing  Minneapolis    MN
+## 2          1 Maggie&#39;s Leap    2691 0.049  26                  Milk / Sweet Stout     16 NorthGate Brewing  Minneapolis    MN
+## 3          1    Wall&#39;s End    2690 0.048  19                   English Brown Ale     16 NorthGate Brewing  Minneapolis    MN
+## 4          1       Pumpion    2689 0.060  38                         Pumpkin Ale     16 NorthGate Brewing  Minneapolis    MN
+## 5          1    Stronghold    2688 0.060  25                     American Porter     16 NorthGate Brewing  Minneapolis    MN
+## 6          1   Parapet ESB    2687 0.056  47 Extra Special / Strong Bitter (ESB)     16 NorthGate Brewing  Minneapolis    MN</code></pre>
+<pre class="r"><code>tail(data,n = 6)                  # Last six from merged set</code></pre>
+<pre><code>##      Brewery_ID                      Beer Beer_ID   ABV IBU                   Style Ounces                       Brewery          City State
+## 2405        556             Pilsner Ukiah      98 0.055  NA         German Pilsener     12         Ukiah Brewing Company         Ukiah    CA
+## 2406        557  Heinnieweisse Weissebier      52 0.049  NA              Hefeweizen     12       Butternuts Beer and Ale Garrattsville    NY
+## 2407        557           Snapperhead IPA      51 0.068  NA            American IPA     12       Butternuts Beer and Ale Garrattsville    NY
+## 2408        557         Moo Thunder Stout      50 0.049  NA      Milk / Sweet Stout     12       Butternuts Beer and Ale Garrattsville    NY
+## 2409        557         Porkslap Pale Ale      49 0.043  NA American Pale Ale (APA)     12       Butternuts Beer and Ale Garrattsville    NY
+## 2410        558 Urban Wilderness Pale Ale      30 0.049  NA        English Pale Ale     12 Sleeping Lady Brewing Company     Anchorage    AK</code></pre>
+>>>>>>> 713acafe79309e05ef49e45dbad14d6be8ca38fa
 <pre class="r"><code># font_import() # first time on a machine only.  Watch the &quot;Console&quot; window for a confirmation dialog
 
 # The following lines create a table that has the number of breweries
@@ -554,6 +581,10 @@ adjData %&gt;%
   stat_cor(aes(x=IBU, y=ABV),method = &quot;pearson&quot;, label.x = 100, label.y = 0.010, na.rm = TRUE) +
   annotate(&quot;text&quot;, x=117, y=0.017, label=&quot;Pearson&#39;s Correlation&quot;) +
   labs(title = &quot;Correlation of ABV vs. IBU&quot;, x=&quot;IBU&quot;, y=&quot;ABV&quot;)</code></pre>
+<<<<<<< HEAD
+=======
+<pre><code>## `geom_smooth()` using formula &#39;y ~ x&#39;</code></pre>
+>>>>>>> 713acafe79309e05ef49e45dbad14d6be8ca38fa
 <p><img src="beer_files/figure-html/relationship%20between%20IBU%20and%20ABV-1.png" width="672" /> If we use the imputed dataset however, the additional data tends toward the mean and the correlation drops to 54%. Even though it lost 13% correlation points, it is still a significant positive correlation.</p>
 <pre class="r"><code>adjData %&gt;% select(c(IBU, ABV)) %&gt;% ggplot() +
   annotation_custom(bg, -Inf, Inf, -Inf, Inf) +                       # beer background
@@ -562,10 +593,17 @@ adjData %&gt;%
   stat_cor(aes(x=IBU, y=ABV),method = &quot;pearson&quot;, label.x = 100, label.y = 0.010, na.rm = TRUE) +
   annotate(&quot;text&quot;, x=117, y=0.017, label=&quot;Pearson&#39;s Correlation&quot;) +
   labs(title = &quot;Correlation of ABV vs. IBU&quot;, x=&quot;IBU&quot;, y=&quot;ABV&quot;)</code></pre>
+<<<<<<< HEAD
 <p><img src="beer_files/figure-html/relationship%20between%20adjusted%20IBU%20and%20ABV-1.png" width="672" /></p>
 <pre class="r"><code>#install.packages(&quot;ggvis&quot;)
 library(ggvis)</code></pre>
 <pre><code>## Warning: package &#39;ggvis&#39; was built under R version 3.6.3</code></pre>
+=======
+<pre><code>## `geom_smooth()` using formula &#39;y ~ x&#39;</code></pre>
+<p><img src="beer_files/figure-html/relationship%20between%20adjusted%20IBU%20and%20ABV-1.png" width="672" /></p>
+<pre class="r"><code>#install.packages(&quot;ggvis&quot;)
+library(ggvis)</code></pre>
+>>>>>>> 713acafe79309e05ef49e45dbad14d6be8ca38fa
 <pre><code>## 
 ## Attaching package: &#39;ggvis&#39;</code></pre>
 <pre><code>## The following object is masked from &#39;package:ggplot2&#39;:
@@ -598,10 +636,15 @@ otherAles &lt;- data %&gt;%
 allAles &lt;- rbind(ipas, otherAles)</code></pre>
 <pre class="r"><code>if(!require(ggforce)) {install.packages(&quot;ggforce&quot;)}</code></pre>
 <pre><code>## Loading required package: ggforce</code></pre>
+<<<<<<< HEAD
 <pre><code>## Warning: package &#39;ggforce&#39; was built under R version 3.6.3</code></pre>
 <pre class="r"><code>if(!require(concaveman)) {install.packages(&quot;concaveman&quot;)}</code></pre>
 <pre><code>## Loading required package: concaveman</code></pre>
 <pre><code>## Warning: package &#39;concaveman&#39; was built under R version 3.6.3</code></pre>
+=======
+<pre class="r"><code>if(!require(concaveman)) {install.packages(&quot;concaveman&quot;)}</code></pre>
+<pre><code>## Loading required package: concaveman</code></pre>
+>>>>>>> 713acafe79309e05ef49e45dbad14d6be8ca38fa
 <pre class="r"><code>library(ggforce)
 library(concaveman)
 library(tidyverse)
@@ -611,7 +654,11 @@ allAles %&gt;% ggplot(aes(x=IBU, y=ABV)) +
   geom_point(aes(color = ipa)) +
   geom_density2d(aes(color=ipa)) +
 
+<<<<<<< HEAD
   labs(title = &quot;IBU x ABV for IPAs and Other Ales&quot;, color = &quot;IPA?&quot;)</code></pre>
+=======
+  labs(title = &quot;IBU x ABV for IPA&#39;s and Other Ales&quot;, color = &quot;IPA?&quot;)</code></pre>
+>>>>>>> 713acafe79309e05ef49e45dbad14d6be8ca38fa
 <p><img src="beer_files/figure-html/draw%20ellipse%20around%20centroid-1.png" width="672" /></p>
 <pre class="r"><code>dev.off()</code></pre>
 <pre><code>## null device 
@@ -633,11 +680,19 @@ allAles %&gt;% ggplot(aes(x=IBU, y=ABV)) +
   geom_point() + geom_smooth(method=&quot;glm&quot;) + 
   stat_cor(aes(x=IBU, y=ABV),method = &quot;pearson&quot;, label.x = 100, label.y = 0.010, na.rm = TRUE) +
   labs(title = &quot;India Pale Ale IBU/ABV Correlation&quot;)</code></pre>
+<<<<<<< HEAD
+=======
+<pre><code>## `geom_smooth()` using formula &#39;y ~ x&#39;</code></pre>
+>>>>>>> 713acafe79309e05ef49e45dbad14d6be8ca38fa
 <p><img src="beer_files/figure-html/summary%20statistics%20on%20IBU%20and%20ABV-1.png" width="672" /></p>
 <pre class="r"><code>otherAles %&gt;% ggplot(aes(x=IBU, y=ABV)) + 
   geom_point() + geom_smooth(method=&quot;glm&quot;) + 
   stat_cor(aes(x=IBU, y=ABV),method = &quot;pearson&quot;, label.x = 80, label.y = 0.010, na.rm = TRUE) +
   labs(title = &quot;Non-IPA IBU/ABV Correlation&quot;)</code></pre>
+<<<<<<< HEAD
+=======
+<pre><code>## `geom_smooth()` using formula &#39;y ~ x&#39;</code></pre>
+>>>>>>> 713acafe79309e05ef49e45dbad14d6be8ca38fa
 <p><img src="beer_files/figure-html/summary%20statistics%20on%20IBU%20and%20ABV-2.png" width="672" /></p>
 <pre class="r"><code># run a set of tests to determine best k value
 iterations = 100 # the number of tests to run
@@ -673,6 +728,7 @@ confusionMatrix(table(ipa_test$ipa, ipa_pr))</code></pre>
 ## 
 ##        ipa_pr
 ##         FALSE TRUE
+<<<<<<< HEAD
 ##   FALSE    50    8
 ##   TRUE      9   28
 ##                                          
@@ -695,6 +751,30 @@ confusionMatrix(table(ipa_test$ipa, ipa_pr))</code></pre>
 ##       Balanced Accuracy : 0.8126         
 ##                                          
 ##        &#39;Positive&#39; Class : FALSE          
+=======
+##   FALSE    44    4
+##   TRUE      9   38
+##                                           
+##                Accuracy : 0.8632          
+##                  95% CI : (0.7774, 0.9251)
+##     No Information Rate : 0.5579          
+##     P-Value [Acc &gt; NIR] : 1.759e-10       
+##                                           
+##                   Kappa : 0.726           
+##                                           
+##  Mcnemar&#39;s Test P-Value : 0.2673          
+##                                           
+##             Sensitivity : 0.8302          
+##             Specificity : 0.9048          
+##          Pos Pred Value : 0.9167          
+##          Neg Pred Value : 0.8085          
+##              Prevalence : 0.5579          
+##          Detection Rate : 0.4632          
+##    Detection Prevalence : 0.5053          
+##       Balanced Accuracy : 0.8675          
+##                                           
+##        &#39;Positive&#39; Class : FALSE           
+>>>>>>> 713acafe79309e05ef49e45dbad14d6be8ca38fa
 ## </code></pre>
 <pre class="r"><code>set.seed(1972)
 iterations = 100
@@ -762,6 +842,10 @@ CM$overall[1]</code></pre>
 </ul>
 <p>It could be beneficial to know what types of beer would sell best in a given state based on what is currently being produced in that state. Using a kNN classification that takes into account IBU, ABV and Style of beer, we can predict with around a 30% success rate the state that beer would most fit into. 30% may not sound like much, but compared to a purely random 1-in-50 chance of picking the right state (a 2% probability), 30% is a 15x improvement.</p>
 
+<<<<<<< HEAD
+=======
+Copyright &copy; 2020 Morgan Nelson, All Rights Reserved.
+>>>>>>> 713acafe79309e05ef49e45dbad14d6be8ca38fa
 
 
 
