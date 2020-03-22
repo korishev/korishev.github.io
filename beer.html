@@ -17,7 +17,7 @@
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<link href="site_libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
 <script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
@@ -537,11 +537,23 @@ adjData %&gt;%
 <pre><code>## `geom_smooth()` using formula &#39;y ~ x&#39;</code></pre>
 <p><img src="beer_files/figure-html/relationship%20between%20adjusted%20IBU%20and%20ABV-1.png" width="672" /></p>
 <pre class="r"><code>#install.packages(&quot;ggvis&quot;)
-library(ggvis)
-library(class)
-library(caret)
-
-# we will use the un-imputed data for this, as the data is much more accurate
+library(ggvis)</code></pre>
+<pre><code>## 
+## Attaching package: &#39;ggvis&#39;</code></pre>
+<pre><code>## The following object is masked from &#39;package:ggplot2&#39;:
+## 
+##     resolution</code></pre>
+<pre class="r"><code>library(class)
+library(caret)</code></pre>
+<pre><code>## 
+## Attaching package: &#39;caret&#39;</code></pre>
+<pre><code>## The following object is masked from &#39;package:openintro&#39;:
+## 
+##     dotPlot</code></pre>
+<pre><code>## The following object is masked from &#39;package:purrr&#39;:
+## 
+##     lift</code></pre>
+<pre class="r"><code># we will use the un-imputed data for this, as the data is much more accurate
 # pull out the IPAs first
 ipas &lt;- data %&gt;% 
   filter(!is.na(IBU) &amp; !is.na(ABV)) %&gt;% 
@@ -556,9 +568,11 @@ otherAles &lt;- data %&gt;%
   mutate(ipa=FALSE)
 
 allAles &lt;- rbind(ipas, otherAles)</code></pre>
-<pre class="r"><code>if(!require(ggforce)) {install.packages(&quot;ggforce&quot;)}
-if(!require(concaveman)) {install.packages(&quot;concaveman&quot;)}
-library(ggforce)
+<pre class="r"><code>if(!require(ggforce)) {install.packages(&quot;ggforce&quot;)}</code></pre>
+<pre><code>## Loading required package: ggforce</code></pre>
+<pre class="r"><code>if(!require(concaveman)) {install.packages(&quot;concaveman&quot;)}</code></pre>
+<pre><code>## Loading required package: concaveman</code></pre>
+<pre class="r"><code>library(ggforce)
 library(concaveman)
 library(tidyverse)
 
@@ -567,7 +581,7 @@ allAles %&gt;% ggplot(aes(x=IBU, y=ABV)) +
   geom_point(aes(color = ipa)) +
   geom_density2d(aes(color=ipa)) +
 
-  labs(title = &quot;IBU x ABV for IPAs and Other Ales&quot;, color = &quot;IPA?&quot;)</code></pre>
+  labs(title = &quot;IBU x ABV for IPA&#39;s and Other Ales&quot;, color = &quot;IPA?&quot;)</code></pre>
 <p><img src="beer_files/figure-html/draw%20ellipse%20around%20centroid-1.png" width="672" /></p>
 <pre class="r"><code>dev.off()</code></pre>
 <pre><code>## null device 
@@ -631,26 +645,26 @@ confusionMatrix(table(ipa_test$ipa, ipa_pr))</code></pre>
 ## 
 ##        ipa_pr
 ##         FALSE TRUE
-##   FALSE    51   13
-##   TRUE      5   26
+##   FALSE    44    4
+##   TRUE      9   38
 ##                                           
-##                Accuracy : 0.8105          
-##                  95% CI : (0.7172, 0.8837)
-##     No Information Rate : 0.5895          
-##     P-Value [Acc &gt; NIR] : 3.803e-06       
+##                Accuracy : 0.8632          
+##                  95% CI : (0.7774, 0.9251)
+##     No Information Rate : 0.5579          
+##     P-Value [Acc &gt; NIR] : 1.759e-10       
 ##                                           
-##                   Kappa : 0.5959          
+##                   Kappa : 0.726           
 ##                                           
-##  Mcnemar&#39;s Test P-Value : 0.09896         
+##  Mcnemar&#39;s Test P-Value : 0.2673          
 ##                                           
-##             Sensitivity : 0.9107          
-##             Specificity : 0.6667          
-##          Pos Pred Value : 0.7969          
-##          Neg Pred Value : 0.8387          
-##              Prevalence : 0.5895          
-##          Detection Rate : 0.5368          
-##    Detection Prevalence : 0.6737          
-##       Balanced Accuracy : 0.7887          
+##             Sensitivity : 0.8302          
+##             Specificity : 0.9048          
+##          Pos Pred Value : 0.9167          
+##          Neg Pred Value : 0.8085          
+##              Prevalence : 0.5579          
+##          Detection Rate : 0.4632          
+##    Detection Prevalence : 0.5053          
+##       Balanced Accuracy : 0.8675          
 ##                                           
 ##        &#39;Positive&#39; Class : FALSE           
 ## </code></pre>
@@ -720,6 +734,7 @@ CM$overall[1]</code></pre>
 </ul>
 <p>It could be beneficial to know what types of beer would sell best in a given state based on what is currently being produced in that state. Using a kNN classification that takes into account IBU, ABV and Style of beer, we can predict with around a 30% success rate the state that beer would most fit into. 30% may not sound like much, but compared to a purely random 1-in-50 chance of picking the right state (a 2% probability), 30% is a 15x improvement.</p>
 
+Copyright &copy; 2020 Morgan Nelson, All Rights Reserved.
 
 
 

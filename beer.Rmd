@@ -2,9 +2,7 @@
 title: "Unit 8 Presentation"
 author: "Michael Hedge and Morgan Nelson"
 date: "February 17, 2020"
-output:
-  html_document: default
-
+output: html_document
 ---
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -332,7 +330,7 @@ allAles %>% ggplot(aes(x=IBU, y=ABV)) +
   geom_point(aes(color = ipa)) +
   geom_density2d(aes(color=ipa)) +
 
-  labs(title = "IBU x ABV for IPAs and Other Ales", color = "IPA?")
+  labs(title = "IBU x ABV for IPA's and Other Ales", color = "IPA?")
 dev.off()
 
 ```
