@@ -16,7 +16,6 @@
 <title>Unit 8 Presentation</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
-<script src="site_libs/elevate-section-attrs-2.0/elevate-section-attrs.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
 <script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
@@ -280,6 +279,9 @@ $(document).ready(function () {
 <li>
   <a href="beer.html">Case Study 1 (The one about beer...)</a>
 </li>
+<li>
+  <a href="CaseStudy2.html">Case Study 2 (The one about employee attrition)</a>
+</li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         
@@ -345,20 +347,20 @@ head(data, n = 6)                 # First six from merged set</code></pre>
 ## 2408        557         Moo Thunder Stout      50 0.049  NA
 ## 2409        557         Porkslap Pale Ale      49 0.043  NA
 ## 2410        558 Urban Wilderness Pale Ale      30 0.049  NA
-##                        Style Ounces                       Brewery
-## 2405         German Pilsener     12         Ukiah Brewing Company
-## 2406              Hefeweizen     12       Butternuts Beer and Ale
-## 2407            American IPA     12       Butternuts Beer and Ale
-## 2408      Milk / Sweet Stout     12       Butternuts Beer and Ale
-## 2409 American Pale Ale (APA)     12       Butternuts Beer and Ale
-## 2410        English Pale Ale     12 Sleeping Lady Brewing Company
-##               City State
-## 2405         Ukiah    CA
-## 2406 Garrattsville    NY
-## 2407 Garrattsville    NY
-## 2408 Garrattsville    NY
-## 2409 Garrattsville    NY
-## 2410     Anchorage    AK</code></pre>
+##                        Style Ounces                       Brewery          City
+## 2405         German Pilsener     12         Ukiah Brewing Company         Ukiah
+## 2406              Hefeweizen     12       Butternuts Beer and Ale Garrattsville
+## 2407            American IPA     12       Butternuts Beer and Ale Garrattsville
+## 2408      Milk / Sweet Stout     12       Butternuts Beer and Ale Garrattsville
+## 2409 American Pale Ale (APA)     12       Butternuts Beer and Ale Garrattsville
+## 2410        English Pale Ale     12 Sleeping Lady Brewing Company     Anchorage
+##      State
+## 2405    CA
+## 2406    NY
+## 2407    NY
+## 2408    NY
+## 2409    NY
+## 2410    AK</code></pre>
 <pre class="r"><code># font_import() # first time on a machine only.  Watch the &quot;Console&quot; window for a confirmation dialog
 
 # The following lines create a table that has the number of breweries
@@ -554,6 +556,7 @@ adjData %&gt;%
   stat_cor(aes(x=IBU, y=ABV),method = &quot;pearson&quot;, label.x = 100, label.y = 0.010, na.rm = TRUE) +
   annotate(&quot;text&quot;, x=117, y=0.017, label=&quot;Pearson&#39;s Correlation&quot;) +
   labs(title = &quot;Correlation of ABV vs. IBU&quot;, x=&quot;IBU&quot;, y=&quot;ABV&quot;)</code></pre>
+<pre><code>## `geom_smooth()` using formula &#39;y ~ x&#39;</code></pre>
 <p><img src="beer_files/figure-html/relationship%20between%20IBU%20and%20ABV-1.png" width="672" /> If we use the imputed dataset however, the additional data tends toward the mean and the correlation drops to 54%. Even though it lost 13% correlation points, it is still a significant positive correlation.</p>
 <pre class="r"><code>adjData %&gt;% select(c(IBU, ABV)) %&gt;% ggplot() +
   annotation_custom(bg, -Inf, Inf, -Inf, Inf) +                       # beer background
@@ -562,10 +565,10 @@ adjData %&gt;%
   stat_cor(aes(x=IBU, y=ABV),method = &quot;pearson&quot;, label.x = 100, label.y = 0.010, na.rm = TRUE) +
   annotate(&quot;text&quot;, x=117, y=0.017, label=&quot;Pearson&#39;s Correlation&quot;) +
   labs(title = &quot;Correlation of ABV vs. IBU&quot;, x=&quot;IBU&quot;, y=&quot;ABV&quot;)</code></pre>
+<pre><code>## `geom_smooth()` using formula &#39;y ~ x&#39;</code></pre>
 <p><img src="beer_files/figure-html/relationship%20between%20adjusted%20IBU%20and%20ABV-1.png" width="672" /></p>
 <pre class="r"><code>#install.packages(&quot;ggvis&quot;)
 library(ggvis)</code></pre>
-<pre><code>## Warning: package &#39;ggvis&#39; was built under R version 3.6.3</code></pre>
 <pre><code>## 
 ## Attaching package: &#39;ggvis&#39;</code></pre>
 <pre><code>## The following object is masked from &#39;package:ggplot2&#39;:
@@ -598,10 +601,8 @@ otherAles &lt;- data %&gt;%
 allAles &lt;- rbind(ipas, otherAles)</code></pre>
 <pre class="r"><code>if(!require(ggforce)) {install.packages(&quot;ggforce&quot;)}</code></pre>
 <pre><code>## Loading required package: ggforce</code></pre>
-<pre><code>## Warning: package &#39;ggforce&#39; was built under R version 3.6.3</code></pre>
 <pre class="r"><code>if(!require(concaveman)) {install.packages(&quot;concaveman&quot;)}</code></pre>
 <pre><code>## Loading required package: concaveman</code></pre>
-<pre><code>## Warning: package &#39;concaveman&#39; was built under R version 3.6.3</code></pre>
 <pre class="r"><code>library(ggforce)
 library(concaveman)
 library(tidyverse)
@@ -633,11 +634,13 @@ allAles %&gt;% ggplot(aes(x=IBU, y=ABV)) +
   geom_point() + geom_smooth(method=&quot;glm&quot;) + 
   stat_cor(aes(x=IBU, y=ABV),method = &quot;pearson&quot;, label.x = 100, label.y = 0.010, na.rm = TRUE) +
   labs(title = &quot;India Pale Ale IBU/ABV Correlation&quot;)</code></pre>
+<pre><code>## `geom_smooth()` using formula &#39;y ~ x&#39;</code></pre>
 <p><img src="beer_files/figure-html/summary%20statistics%20on%20IBU%20and%20ABV-1.png" width="672" /></p>
 <pre class="r"><code>otherAles %&gt;% ggplot(aes(x=IBU, y=ABV)) + 
   geom_point() + geom_smooth(method=&quot;glm&quot;) + 
   stat_cor(aes(x=IBU, y=ABV),method = &quot;pearson&quot;, label.x = 80, label.y = 0.010, na.rm = TRUE) +
   labs(title = &quot;Non-IPA IBU/ABV Correlation&quot;)</code></pre>
+<pre><code>## `geom_smooth()` using formula &#39;y ~ x&#39;</code></pre>
 <p><img src="beer_files/figure-html/summary%20statistics%20on%20IBU%20and%20ABV-2.png" width="672" /></p>
 <pre class="r"><code># run a set of tests to determine best k value
 iterations = 100 # the number of tests to run
@@ -673,28 +676,28 @@ confusionMatrix(table(ipa_test$ipa, ipa_pr))</code></pre>
 ## 
 ##        ipa_pr
 ##         FALSE TRUE
-##   FALSE    44   10
-##   TRUE     12   29
-##                                           
-##                Accuracy : 0.7684          
-##                  95% CI : (0.6706, 0.8488)
-##     No Information Rate : 0.5895          
-##     P-Value [Acc &gt; NIR] : 0.0001906       
-##                                           
-##                   Kappa : 0.5252          
-##                                           
-##  Mcnemar&#39;s Test P-Value : 0.8311704       
-##                                           
-##             Sensitivity : 0.7857          
-##             Specificity : 0.7436          
-##          Pos Pred Value : 0.8148          
-##          Neg Pred Value : 0.7073          
-##              Prevalence : 0.5895          
-##          Detection Rate : 0.4632          
-##    Detection Prevalence : 0.5684          
-##       Balanced Accuracy : 0.7647          
-##                                           
-##        &#39;Positive&#39; Class : FALSE           
+##   FALSE    46    7
+##   TRUE      5   37
+##                                          
+##                Accuracy : 0.8737         
+##                  95% CI : (0.7897, 0.933)
+##     No Information Rate : 0.5368         
+##     P-Value [Acc &gt; NIR] : 2.403e-12      
+##                                          
+##                   Kappa : 0.7452         
+##                                          
+##  Mcnemar&#39;s Test P-Value : 0.7728         
+##                                          
+##             Sensitivity : 0.9020         
+##             Specificity : 0.8409         
+##          Pos Pred Value : 0.8679         
+##          Neg Pred Value : 0.8810         
+##              Prevalence : 0.5368         
+##          Detection Rate : 0.4842         
+##    Detection Prevalence : 0.5579         
+##       Balanced Accuracy : 0.8714         
+##                                          
+##        &#39;Positive&#39; Class : FALSE          
 ## </code></pre>
 <pre class="r"><code>set.seed(1972)
 iterations = 100
